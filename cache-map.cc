@@ -77,7 +77,6 @@ class CacheMap {
                 } else {
                         n = table[n].next;
                 }
-                printf("move to %d\n", n);
         } while (n != orig);
 
         Index lru = table[mru].mru_prev;
