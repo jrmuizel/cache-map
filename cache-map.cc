@@ -120,13 +120,14 @@ private:
         Index mru;
         Index htable[htable_size];
 };
+
 int main()
 {
         CacheMap<int, int> m;
         for (int i=0; i<260; i++) {
                 printf("%d\n", m.get(i, [](int x) { printf("get %d'\n", x); return x + 1; }));
         }
-        for (int i=0; i<260; i++) {
+        for (int i=259; i>=0; i--) {
                 printf("%d\n", m.get(i, [](int x) { printf("get %d'\n", x); return x + 1; }));
         }
 }
