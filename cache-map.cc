@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 static const uint32_t kGoldenRatioU32 = 0x9E3779B9U;
 int hash(int a)
 {
@@ -32,11 +33,21 @@ class CacheMap {
                 }
                 table[0].mru_prev = SIZE-1;
                 table[SIZE-1].mru_next = 0;
+                mru = 0;
         }
                 template <class T>
         const Value get(Key key, T compute) {
-        int h = hash(key);
         const int mask = (1 <<  htable_size_bits) - 1;
+
+#if 0
+        for (int i = 0; i < htable_size; i++) {
+                if (htable[i] != empty) {
+                        assert((hash(table[htable[i]].key) & mask) == i);
+                }
+        }
+#endif
+
+        int h = hash(key);
         Index n = htable[h & mask];
 
         Index orig = n;
@@ -87,11 +98,16 @@ class CacheMap {
         table[next].prev = prev;
 
         // insert at head
-        prev = table[orig].prev;
-        table[lru].prev = prev;
-        table[lru].next = orig;
-        table[orig].prev = lru;
-        table[prev].next = lru;
+        if (orig == empty) {
+                table[lru].next = lru;
+                table[lru].prev = lru;
+        } else {
+                prev = table[orig].prev;
+                table[lru].prev = prev;
+                table[lru].next = orig;
+                table[orig].prev = lru;
+                table[prev].next = lru;
+        }
         table[lru].key = key;
         table[lru].value = compute(key);
 
