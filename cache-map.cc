@@ -26,13 +26,18 @@ public:
             htable[i] = empty;
         }
         for (int i = 0; i < SIZE; i++) {
+            // hook up the mru list
             table[i].mru_next = i + 1;
             table[i].mru_prev = i - 1;
+            // each item links to itself
             table[i].next = i;
             table[i].prev = i;
         }
+        // complete the loop
         table[0].mru_prev = SIZE-1;
         table[SIZE-1].mru_next = 0;
+
+        // the choice of mru doesn't matter
         mru = 0;
     }
 
@@ -54,15 +59,17 @@ public:
         Index orig = n;
         if (n != empty) do {
             if (table[n].key == key) {
+                // we've found what we're looking for
                 if (mru == n)
                     return table[n].value;
-                // remove from old location
+
+                // remove from old location in mru list
                 Index next = table[n].mru_next;
                 Index prev = table[n].mru_prev;
                 table[prev].mru_next = next;
                 table[next].mru_prev = prev;
 
-                // insert at head
+                // insert at head of mru list
                 prev = table[mru].mru_prev;
                 table[n].mru_prev = prev;
                 table[n].mru_next = mru;
@@ -70,16 +77,20 @@ public:
                 table[prev].mru_next = n;
 
                 mru = n;
-                // rotate the linked list so that n is at the head
+
+                // rotate the bucket linked list so that n is at the head
                 // alternatively we could move the entry as part of the
                 // list so that each cache bucket is also mru ordered
                 htable[h & mask] = n;
                 return table[n].value;
             } else {
+                // keep searching
                 n = table[n].next;
             }
         } while (n != orig);
 
+        // we didn't find what we're looking for.
+        // we're going to replace the lru item
         Index lru = table[mru].mru_prev;
 
         int lru_h = hash(table[lru].key);
