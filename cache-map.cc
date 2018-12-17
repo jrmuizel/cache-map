@@ -11,6 +11,24 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+
+/* There are two tables: 'htable' and 'table':
+ *
+ * 'htable' maps a hash bucket index to an index
+ * into 'table'
+ *
+ * 'table' contains linked lists of items matching a
+ * particular hash bucket index.
+ * It also maintains a list of most recently used items.
+ *
+ * Accessing an entry is at most O(number of collisions) however
+ * the most recently accessed item in that hash bucket will be at
+ * the front so repeated accesses are fast. (The linked list of
+ * colliding items is not mru sorted but could be)
+ *
+ * Every time an item is added the least recently used item
+ * is dropped from the table.
+ */
 static const uint32_t kGoldenRatioU32 = 0x9E3779B9U;
 int hash(int a)
 {
